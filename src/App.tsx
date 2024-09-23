@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { callInfraAPI } from "./config/infra";
 
 import "./App.css";
@@ -50,28 +50,40 @@ const App: React.FC = () => {
     );
   };
 
-  const renderMessage = useCallback(
-    (message: { title: string; description: string }) => {
-      return (
-        <List.Item>
-          <List.Item.Meta
-            avatar={
-              <Avatar
-                src={
-                  message.title === "assistant"
-                    ? `https://api.dicebear.com/9.x/bottts/svg?seed=Felix`
-                    : `https://api.dicebear.com/9.x/notionists/svg?seed=Felix`
+  const renderMessageList = useMemo(() => {
+    return (
+      <List
+        itemLayout="horizontal"
+        dataSource={messages
+          .map((m) => {
+            return {
+              title: m.role,
+              description: m.content,
+            };
+          })
+          .reverse()}
+        renderItem={(item) => {
+          return (
+            <List.Item>
+              <List.Item.Meta
+                avatar={
+                  <Avatar
+                    src={
+                      item.title === "assistant"
+                        ? `https://api.dicebear.com/9.x/bottts/svg?seed=Felix`
+                        : `https://api.dicebear.com/9.x/notionists/svg?seed=Felix`
+                    }
+                  />
                 }
+                title={item.title}
+                description={item.description}
               />
-            }
-            title={message.title}
-            description={message.description}
-          />
-        </List.Item>
-      );
-    },
-    []
-  );
+            </List.Item>
+          );
+        }}
+      />
+    );
+  }, [messages]);
 
   const handleSubmit = () => {
     if (search === "") {
@@ -103,18 +115,7 @@ const App: React.FC = () => {
       </Row>
 
       <section style={{ maxHeight: "80dvh", marginTop: 20, overflow: "auto" }}>
-        <List
-          itemLayout="horizontal"
-          dataSource={messages
-            .map((m) => {
-              return {
-                title: m.role,
-                description: m.content,
-              };
-            })
-            .reverse()}
-          renderItem={renderMessage}
-        />
+        {renderMessageList}
       </section>
     </main>
   );
